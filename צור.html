@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ניהול מכשירים</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0px;
+            padding: 0;
+            direction: rtl; /* מימין לשמאל */
+            text-align: center; /* למרכז את הטקסט */
+        }
+
+        table {
+            width: auto; /* רוחב אוטומטי מותאם לתוכן */
+            border-collapse: collapse;
+            margin: 0px auto 30px auto; /* למרכז את הטבלה */
+        }
+        td, th {
+            border: 0px solid #ddd;
+            padding: 4px; /* ביטול המרווח האנכי בין התוכן לתא */
+            text-align: center;	
+	vertical-align: center;
+
+
+	
+        }
+        th {
+                background-color: white; 
+      color: black;
+      font-weight: bold; /* טקסט מודגש */
+      text-align: center; /* טקסט מיושר למרכז */
+      padding: 10px; /* רווח פנימי */
+      border: 0px solid #ddd; /* קו גבול דק */
+      font-size: 14px; /* גודל פונט קטן יותר */
+      font-weight: normal; /* טקסט לא מודגש */
+        }
+        input[type="number"], select {
+            box-sizing: border-box;
+            text-align: center; /* למרכז את התוכן בתוך תיבות הטקסט */
+        }
+        input[name="power"] {
+            width: 60px; /* רוחב שמתאים ל-4 ספרות */
+        }
+        input[name="hours"] {
+            width: 40px; /* רוחב שמתאים ל-2 ספרות */
+        }
+        input[name="utilization"] {
+            width: 50px; /* רוחב שמתאים ל-3 ספרות */
+        }
+        select {
+            width: auto; /* רוחב אוטומטי לפי התוכן */
+        }
+        button {
+            padding: 5px 10px;
+            margin: 2px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .status-btn {
+            padding: 5px;
+            margin: 2px;
+            border: 0px solid #ddd;
+            border-radius: 10px;
+            color: white;
+        }
+        .status-btn.default {
+            background-color: #e0e0e0; /* אפור בהיר */
+        }
+        .status-btn.a {
+            background-color: #add8e6; /* כחול בהיר */
+        }
+        .status-btn.b {
+            background-color: #90ee90; /* ירוק בהיר */
+        }
+        .reset-btn {
+            background-color: #e0e0e0;
+            color: black;
+        }
+        .reset-btn:hover {
+            background-color: #c82333;
+            color: white;
+        }
+        /* יצירת בלון מידע מותאם אישית */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        /* עיצוב בלון המידע */
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 350px;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* מיקום מעל האלמנט */
+            left: 50%;
+            margin-left: -60px; /* מרחק מהאמצע */
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* חץ קטן עבור הבלון */
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%; /* מתחת לבלון */
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: black transparent transparent transparent;
+        }
+
+        /* הצגת הבלון כאשר העכבר עובר מעל האלמנט */
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body>
+    <table cellspacing="0" cellpadding="0">
+<tr>
+<td rowspan="3"  valign="top" width="130">
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+    <b>ניהול תוכניות</b><br/><br/>
+<small>	
+    <button id="resetBtn" class="reset-btn" style="padding: 3px 10px 2px 10px;">אפס תוכנית</button><br/><br/>
+לשמירת התוכנית:<br/>
+    <input type="text" id="programName" placeholder="שם תוכנית חדשה" size="10"><br/>
+    <button id="saveProgramBtn" style="padding: 3px 10px 2px 10px;">שמור תוכנית</button><br/><br/>
+לטעינת תוכנית:<br/>	
+    <select id="programSelect">
+        <option value="">בחר תוכנית</option>
+    </select><br/>
+    <button id="updateProgramBtn" style="display: none;" style="padding: 3px 10px 2px 10px;">עדכן תוכנית</button><br/>
+    <button id="deleteProgramBtn" style="padding: 3px 10px 2px 10px;">מחק תוכנית</button>
+<br/><br/><br/>
+<small>
+להוספת מכשיר 	<br/>שלא מופיע ברשימה:</small>
+    <input type="text" id="newProductName" placeholder="שם מכשיר חדש" size="8">
+    <button id="addNewProductBtn">הוסף</button>
+<br/>
+ </small>
+
+
+
+	</td>	
+<td>
+<a href="https://mail.google.com/mail/?view=cm&fs=1&to=Tzur.Tec7@gmail.com&su=יצירת קשר ממערכת לחישוב צריכה&body=תוכן ההודעה" target="_blank">
+	<img src="צור.files/צור_ונקדשתי.png">
+</a>
+<br/>
+מערכת לחישוב צריכת חשמל
+
+    <table id="productTable">
+        <thead>
+            <tr>
+                <th>
+<img src="צור.files/צור_חץ.jpg" width="120">
+<br/>
+שם מכשיר
+
+
+
+</th>
+                <th>צריכת <br/>וואט לשעה
+<div class="tooltip"><sup><b>[?]</b></sup> 
+    <span class="tooltiptext">כתבנו עבורכם את הצריכה הממוצעת עבור כל מכשיר, אבל כמובן שיש הבדלים בין חברות ובין מוצר ישן לחדש, על פי רוב ניתן למצוא נתון זה כתוב על גבי המכשיר מסומן באות W</span>
+</div>	
+</th>
+                <th>שעות <br/>בשימוש
+<div class="tooltip"><sup><b>[?]</b></sup> 
+    <span class="tooltiptext">ביחרו כאן כמה שעות בשבת הנכם משתמשים במוצר, מומלץ לבנות תוכנית רק ליממה אחת, אבל ברווח, כך שיספיק גם ליומיים ושלושה עם צמצום קצת בצריכה</span>
+</div>	
+</th>
+                <th>אחוזי <br/>פעילות
+<div class="tooltip"><sup><b>[?]</b></sup> 
+    <span class="tooltiptext">כאן ניתן לציין כמה שעות בפועל המכשיר עובד, כגון במקרר רק מחצית מהשעות המנוע פעיל ולכן מסמנים 50%, במזגן זה תלוי לכמה מעלות מכוונים - מסתבר שב16 מעלות המדחס כמעט ולא ינוח, ואילו ב24 מעלות מסתבר שלפחות חצי מהזמן הוא נח [אלא אם כן מדובר ביום חם במיוחד]</span>
+</div>	
+</th>
+                <th>מצב
+<div class="tooltip"><sup><b>[?]</b></sup> 
+    <span class="tooltiptext">ניתן לחסוך בעלות הממיר אם מחליטים שלא להפעיל בו זמנית את כל המכשירים, לשם כך ליחצו על הכפתור 'כללי' כדי לבחור מצב. למשל אם אינכם מפעילים בו זמנית גם את המזגן בסלון וגם את המזגנים בחדרים, ביחרו עבור המזגן בסלון מצב א' ועבור שאר המזגנים מצב ב'<br/> [את שאר המכשירים שעובדים תמיד השאירו במצב כללי]</span>
+</div>	
+</th>
+                <th>פעולות</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+<tfoot>
+	<tr>
+	<td colspan="6">    <button id="addRowBtn" style="background-color: #90ee90;">לחץ כאן להוספת מכשיר</button>
+</td></tr>
+</tfoot>
+    </table>
+<a href="https://mail.google.com/mail/?view=cm&fs=1&to=Tzur.Tec7@gmail.com&su=יצירת קשר ממערכת לחישוב צריכה&body=תוכן ההודעה" target="_blank">
+	<img src="צור.files/צור_טלפון.jpg" width="621" ><br>
+</a>
+</td>
+<td rowspan="3"  valign="top" width="140">
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<B>מידע:</b><br/><br/>
+<small>
+<b><u>ממיר</u></b><br/>
+    <div>הצריכה המקסימלית <br/> שלך ברגע נתון הינה
+<br/> <b><span id="totalPower">0</span> וואט</b></div>
+  <div>  לשם כך מומלץ  
+<div class="tooltip"><sup><b>[?]</b></sup> 
+    <span class="tooltiptext">על מנת שלא לאמץ את הממיר יתר על המידה, הוספנו 30% הספק על ההספק הנצרך בפועל, ובזה מרוויחים גם אורך חיי מוצר, וגם מניעת הפסקות חשמל במקרה של צריכת יתר</span>
+</div>	
+
+ <br/> ממיר בהספק
+<br/>
+<b><span id="Inverter">0</span> וואט</b></div>
+<br/>
+<b><u>מערכת צבירה</u></b><br/>
+    <div>במהלך כל השבת<br/> אתה צורך סך 
+<br/>
+<b><span id="totalConsumption">0</span> וואט</b></div>
+    <div>לשם כך מומלצת 
+<div class="tooltip"><sup><b>[?]</b></sup> 
+    <span class="tooltiptext">הוספנו 20% על הצריכה הנצרכת, משום שפריקת הסוללות היא עד 80% ולא יותר</span>
+</div>	
+<br/>מערכת צבירה בהספק 
+<br/>
+<b><span id="Batteries">0</span> וואט</b></div>
+<br/>
+<B><u>עלויות (מוערך)</u></b><br/><br/>
+    <div> מצברי עופרת (רטוב): 
+<br/><b><span id="totalLeadSystemCost">0</span> ש"ח</b></div>
+<br/>
+    <div>מצברי ליתיום (יבש): 
+<br/><b><span id="totalLithiumSystemCostRange">0</span> ש"ח</b></div>
+ </small>
+</td>
+</tr>
+</table>
+
+<br/>
+
+<hr style="border: none; border-top: 2px dashed ; margin: 20px 0;">
+<b>קצת מידע כללי</b>
+<table ><tr><td width=600>
+
+<p class=MsoNormal dir=RTL style='margin-bottom:6.0pt;text-align:justify'><b><span
+lang=HE style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>מערכות צבירה</span></b><b><span
+lang=HE style='font-size:10.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'> <u>עופרת חומצה</u> </span></b><b><span
+lang=HE style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>– הפתרון המושלם לאגירת אנרגיה אמינה
+ובטוחה</span></b><span dir=LTR style='font-size:9.0pt;line-height:115%;
+mso-bidi-font-family:Gisha'><o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-bottom:6.0pt;text-align:justify'><span
+lang=HE style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>כאשר מדובר על אגירת אנרגיה בצורה אמינה
+ויעילה, מערכות צבירה עופרת חומצה הן בחירה מצוינת המציעה מגוון יתרונות</span><span
+dir=LTR></span><span dir=LTR style='font-size:9.0pt;line-height:115%;
+mso-bidi-font-family:Gisha'><span dir=LTR></span>:<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l6 level1 lfo12;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>עלות-תועלת גבוהה</span></b><span dir=LTR></span><span dir=LTR
+style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span dir=LTR></span>: </span><span
+lang=HE style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>מערכות עופרת חומצה הן אחת מהאפשרויות הזולות ביותר לאגירת אנרגיה,
+מה שהופך אותן לפתרון משתלם במיוחד עבור צרכנים פרטיים ומוסדיים כאחד</span><span
+dir=LTR></span><span dir=LTR style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span
+dir=LTR></span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l6 level1 lfo12;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>אמינות מוכחת</span></b><span dir=LTR></span><span dir=LTR
+style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span dir=LTR></span>: </span><span
+lang=HE style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>עם היסטוריה ארוכה של שימוש מוצלח בוריאציות שונות, מערכות עופרת
+חומצה מצטיינות באמינות ועמידות לאורך זמן. הן מסוגלות לספק ביצועים יציבים תחת
+מגוון תנאי עבודה</span><span dir=LTR></span><span dir=LTR style='font-size:
+9.0pt;mso-bidi-font-family:Gisha'><span dir=LTR></span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l6 level1 lfo12;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>תחזוקה פשוטה</span></b><span dir=LTR></span><span dir=LTR
+style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span dir=LTR></span>: </span><span
+lang=HE style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>מערכות אלו דורשות תחזוקה מינימלית, מה שחוסך בזמן ובעלויות תחזוקה.
+בעזרת תחזוקה תקופתית פשוטה של מילוי מים מזוקקים אחת לחודש, ניתן להבטיח שהמערכת
+תמשיך לפעול בצורה מיטבית לאורך שנים</span><span dir=LTR></span><span dir=LTR
+style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span dir=LTR></span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l6 level1 lfo12;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>התאמה לשימושים מגוונים</span></b><span dir=LTR></span><span
+dir=LTR style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span dir=LTR></span>:
+</span><span lang=HE style='font-size:9.0pt;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>מערכות צבירה עופרת חומצה מתאימות
+לשימושים רבים ומגוונים – ממערכות שבת וחירום ביתיות ועד לפרויקטים מוסדיים
+גדולים. הגמישות הרבה שלהן מאפשרת להן להשתלב בקלות במערכות שונות ולהתאים לצרכים
+ייחודיים של כל לקוח</span><span dir=LTR></span><span dir=LTR style='font-size:
+9.0pt;mso-bidi-font-family:Gisha'><span dir=LTR></span>.</span><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'><o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:12.0pt;margin-right:0cm;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify'><b><span lang=HE
+style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'><o:p>&nbsp;</o:p></span></b></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:12.0pt;margin-right:0cm;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify'><b><span lang=HE
+style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>מערכות צבירה </span></b><b><u><span
+lang=HE style='font-size:10.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>ליתיום</span></u></b><b><span lang=HE
+style='font-size:10.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'> </span></b><b><span lang=HE
+style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>מתקדמות – הפתרון המוביל לאגירת אנרגיה
+יעילה ואמינה</span></b><span dir=LTR style='font-size:9.0pt;line-height:115%;
+mso-bidi-font-family:Gisha'><o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-bottom:6.0pt;text-align:justify'><span
+lang=HE style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>בעולם האנרגיה המתחדשת, מערכות צבירה
+ליתיום מתקדמות מהוות את חוד החנית של הטכנולוגיה, ומציעות מגוון רחב של יתרונות
+המבטיחים ביצועים יוצאי דופן</span><span dir=LTR></span><span dir=LTR
+style='font-size:9.0pt;line-height:115%;mso-bidi-font-family:Gisha'><span
+dir=LTR></span>:<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l13 level1 lfo13;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>יעילות אנרגטית גבוהה</span></b><span dir=LTR></span><span lang=HE
+dir=LTR style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span dir=LTR></span>
+</span><span dir=LTR style='font-size:9.0pt;mso-bidi-font-family:Gisha'>:</span><span
+lang=HE style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>מערכות צבירה ליתיום מצטיינות בניצול אנרגיה מרבי, מה שמבטיח זמן
+שימוש ארוך יותר לכל מחזור טעינה. הן מספקות אחוזי נצילות גבוהים במיוחד, ומאפשרות
+אגירת אנרגיה בצורה אופטימלית</span><span dir=LTR></span><span dir=LTR
+style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span dir=LTR></span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l13 level1 lfo13;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>משקל קל ונפח קטן</span></b><span lang=HE style='font-size:9.0pt;
+font-family:"Gisha",sans-serif;mso-ascii-font-family:Aptos;mso-ascii-theme-font:
+minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:minor-latin'>: בזכות
+הטכנולוגיה המתקדמת שלהן, מערכות ליתיום הן קלות ונפחיות פחות ממערכות צבירה אחרות
+באופן משמעותי, מה שמאפשר התקנה פשוטה וקלה יותר, הן במגזר הביתי והן במגזר
+התעשייתי</span><span dir=LTR></span><span dir=LTR style='font-size:9.0pt;
+mso-bidi-font-family:Gisha'><span dir=LTR></span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l13 level1 lfo13;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>אורך חיים ארוך</span></b><span lang=HE style='font-size:9.0pt;
+font-family:"Gisha",sans-serif;mso-ascii-font-family:Aptos;mso-ascii-theme-font:
+minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:minor-latin'>: סוללות
+ליתיום ידועות באורך חיי השימוש הארוך שלהן, המספקות מספר רב של מחזורי טעינה
+ופריקה לפני שהן מאבדות מכוחן, הוי אומר בין 6,000 ל10,000 מחזורי פריקה וטעינה
+לעומת 1,000-1,500 מחזורים במצברי עופרת חומצה. בכך הן מבטיחות השקעה לטווח ארוך
+עם תחזוקה מינימלית</span><span dir=LTR></span><span dir=LTR style='font-size:
+9.0pt;mso-bidi-font-family:Gisha'><span dir=LTR></span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l13 level1 lfo13;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>בטיחות מתקדמת</span></b><span lang=HE style='font-size:9.0pt;
+font-family:"Gisha",sans-serif;mso-ascii-font-family:Aptos;mso-ascii-theme-font:
+minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:minor-latin'>:</span><span
+dir=LTR></span><span lang=HE dir=LTR style='font-size:9.0pt;mso-bidi-font-family:
+Gisha'><span dir=LTR></span> </span><span lang=HE style='font-size:9.0pt;
+font-family:"Gisha",sans-serif;mso-ascii-font-family:Aptos;mso-ascii-theme-font:
+minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:minor-latin'>מערכות
+צבירה ליתיום כוללות מערכות ניהול חכמות שמבטיחות בטיחות מקסימלית, כולל הגנות
+מפני טעינת יתר, פריקת יתר, וקצרים חשמליים. טכנולוגיות אלו מבטיחות שימוש בטוח
+לאורך כל חיי המערכת</span><span dir=LTR></span><span dir=LTR style='font-size:
+9.0pt;mso-bidi-font-family:Gisha'><span dir=LTR></span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l13 level1 lfo13;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>גמישות בהרחבה</span></b><span lang=HE style='font-size:9.0pt;
+font-family:"Gisha",sans-serif;mso-ascii-font-family:Aptos;mso-ascii-theme-font:
+minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:minor-latin'>: רק מערכות
+ליתיום מאפשרות הוספת סוללות נוספות בקלות, מה שמאפשר להגדיל את קיבולת האחסון של
+האנרגיה לפי הצורך באופן פשוט, מותאם, מהיר ויעיל</span><span dir=LTR></span><span
+dir=LTR style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span dir=LTR></span>.</span><span
+dir=RTL></span><b><span style='font-size:9.0pt;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'><span dir=RTL></span> </span></b><span
+dir=LTR style='font-size:9.0pt;mso-bidi-font-family:Gisha'><o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l13 level1 lfo13;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>6.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>ידידותיות לסביבה</span></b><span lang=HE style='font-size:9.0pt;
+font-family:"Gisha",sans-serif;mso-ascii-font-family:Aptos;mso-ascii-theme-font:
+minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:minor-latin'>: סוללות
+ליתיום נחשבות לידידותיות יותר לסביבה ואינם פולטות גזים ולכן אין הכרח להתקין
+אותם מחוץ לבית.</span><span dir=LTR style='font-size:9.0pt;mso-bidi-font-family:
+Gisha'><o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l13 level1 lfo13;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>7.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>תמיכה בטכנולוגיות מתחדשות</span></b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>:</span><span dir=LTR></span><span lang=HE dir=LTR
+style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span dir=LTR></span> </span><span
+lang=HE style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>מערכות צבירה ליתיום משתלבות בצורה אידיאלית עם מערכות סולאריות
+וטכנולוגיות מתחדשות אחרות, ומאפשרות אגירה ושימוש באותה האנרגיה המופקת ממקורות
+מתחדשים</span><span dir=LTR></span><span dir=LTR style='font-size:9.0pt;
+mso-bidi-font-family:Gisha'><span dir=LTR></span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:12.0pt;margin-right:0cm;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify'><b><span lang=HE
+style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'><o:p>&nbsp;</o:p></span></b></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:12.0pt;margin-right:0cm;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify'><b><span lang=HE
+style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>מערכות </span></b><b><u><span lang=HE
+style='font-size:10.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>סולאריות</span></u></b><b><span
+lang=HE style='font-size:10.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'> </span></b><b><span lang=HE
+style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>– הכדאיות שבאנרגיה מתחדשת</span></b><span
+dir=LTR style='font-size:9.0pt;line-height:115%;mso-bidi-font-family:Gisha'><o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-bottom:6.0pt;text-align:justify'><span
+lang=HE style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>המעבר לשימוש במערכות סולאריות לאגירת
+אנרגיה חשמלית מהווה צעד חכם ובעל יתרונות רבים, הנה כמה מהסיבות המרכזיות שהופכות
+את ההשקעה במערכות סולאריות לכדאית במיוחד</span><span dir=LTR></span><span
+dir=LTR style='font-size:9.0pt;line-height:115%;mso-bidi-font-family:Gisha'><span
+dir=LTR></span>:<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l0 level1 lfo14;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>חסכון כלכלי משמעותי</span></b><span lang=HE style='font-size:9.0pt;
+font-family:"Gisha",sans-serif;mso-ascii-font-family:Aptos;mso-ascii-theme-font:
+minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:minor-latin'>: עם
+התקנת מערכת סולארית על גג הבית או העסק, תוכלו להקטין משמעותית את חשבונות החשמל
+שלכם. השמש מספקת אנרגיה בחינם, וכך כל קילוואט שאתם מייצרים בעצמכם חוסך לכם כסף</span><span
+dir=LTR></span><span dir=LTR style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span
+dir=LTR></span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l0 level1 lfo14;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>החזר השקעה מהיר</span></b><span lang=HE style='font-size:9.0pt;
+font-family:"Gisha",sans-serif;mso-ascii-font-family:Aptos;mso-ascii-theme-font:
+minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:minor-latin'>: בזכות
+החסכונות בחשבונות החשמל החזר ההשקעה במערכת סולארית יכול להיות מהיר יותר מכפי
+שחושבים. לעיתים ניתן לראות את ההשקעה חוזרת כבר תוך מספר שנים בודדות</span><span
+dir=LTR></span><span dir=LTR style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span
+dir=LTR></span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l0 level1 lfo14;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>הגברת ערך הנכס</span></b><span lang=HE style='font-size:9.0pt;
+font-family:"Gisha",sans-serif;mso-ascii-font-family:Aptos;mso-ascii-theme-font:
+minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:minor-latin'>: בית
+או עסק עם מערכת סולארית מותקנת נחשב לאטרקטיבי יותר ויכול להעלות את ערכו בשוק
+הנדל&quot;ן. מערכות סולאריות נחשבות להשקעה חכמה שיכולה לשפר את ערך הנכס שלכם</span><span
+dir=LTR></span><span dir=LTR style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span
+dir=LTR></span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l0 level1 lfo14;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>עצמאות אנרגטית</span></b><span lang=HE style='font-size:9.0pt;
+font-family:"Gisha",sans-serif;mso-ascii-font-family:Aptos;mso-ascii-theme-font:
+minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:minor-latin'>: עם
+מערכת סולארית משלכם, אינכם תלויים בחברת החשמל ובתנודות מחירי האנרגיה. אתם
+מייצרים את האנרגיה שלכם, שומרים על יציבות כלכלית ויכולים להתנהל בצורה חכמה יותר</span><span
+dir=LTR></span><span dir=LTR style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span
+dir=LTR></span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l0 level1 lfo14;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>תחזוקה מינימלית</span></b><span lang=HE style='font-size:9.0pt;
+font-family:"Gisha",sans-serif;mso-ascii-font-family:Aptos;mso-ascii-theme-font:
+minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:minor-latin'>: מערכות
+סולאריות מודרניות הן עמידות ואמינות, ודורשות תחזוקה מינימלית. בעזרת ניקוי
+תקופתי ובדיקות בסיסיות, ניתן להבטיח שהמערכת תמשיך לתפקד בצורה מיטבית לאורך שנים
+רבות</span><span dir=LTR></span><span dir=LTR style='font-size:9.0pt;
+mso-bidi-font-family:Gisha'><span dir=LTR></span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:36.0pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-18.0pt;
+line-height:normal;mso-pagination:none;mso-list:l0 level1 lfo14;mso-hyphenate:
+none;tab-stops:list 36.0pt'><![if !supportLists]><span style='font-size:9.0pt;
+mso-bidi-font-family:Aptos;mso-bidi-theme-font:minor-latin'><span
+style='mso-list:Ignore'>6.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span dir=RTL></span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>שילוב אופטימייזרים: </span></b><span lang=HE style='font-size:
+9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:Aptos;mso-ascii-theme-font:
+minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:minor-latin'>האופטימייזרים
+הינם רכיבים אלקטרוניים המותקנים במערכות סולאריות כדי למקסם את תפוקת האנרגיה מכל
+פאנל בנפרד. הם מאפשרים ניהול חכם ובקרה על כל פאנל, מונעים הפסדים עקב הצללה או נזקים,
+ומספקים גמישות בהתקנה. בנוסף, האופטימייזרים תורמים לבטיחות המערכת, מאריכים את חייה,
+ומפחיתים עלויות תחזוקה. בשורה התחתונה, אופטימייזרים מבטיחים ניצול מקסימלי של האנרגיה
+המופקת, תוך שמירה על תפקוד מיטבי ובטיחות מרבית של המערכת הסולארית.</span><span
+dir=LTR style='font-size:9.0pt;mso-bidi-font-family:Gisha'><o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-bottom:6.0pt;text-align:justify'><b><span
+lang=HE style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'><o:p>&nbsp;</o:p></span></b></p>
+
+<p class=MsoNormal dir=RTL style='margin-bottom:6.0pt;text-align:justify'><b><u><span
+lang=HE style='font-size:10.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>שילוב</span></u></b><b><span lang=HE
+style='font-size:10.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'> </span></b><b><span lang=HE
+style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>מערכת סולארית עם מערכת צבירה – מיקסום
+האנרגיה והרווחים</span></b><span dir=LTR style='font-size:9.0pt;line-height:
+115%;mso-bidi-font-family:Gisha'><o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-bottom:6.0pt;text-align:justify'><span
+lang=HE style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>השילוב בין מערכת סולארית למערכת צבירה
+פותח דלת לעולם חדש של יעילות אנרגטית ורווחיות כלכלית. הנה הסיבות המרכזיות
+שהופכות את השילוב הזה לכדאי במיוחד, גם לצרכים פרטיים וגם למוסדות</span><span
+dir=LTR></span><span dir=LTR style='font-size:9.0pt;line-height:115%;
+mso-bidi-font-family:Gisha'><span dir=LTR></span>:<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:34.85pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-17.85pt;
+line-height:normal;mso-pagination:none;mso-list:l1 level2 lfo15;mso-hyphenate:
+none'><![if !supportLists]><span style='font-size:9.0pt;mso-bidi-font-family:
+Aptos;mso-bidi-theme-font:minor-latin'><span style='mso-list:Ignore'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+dir=RTL></span><b><span lang=HE style='font-size:9.0pt;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>הקטנת גודל מערכת הצבירה לשבת</span></b><span
+dir=LTR></span><span dir=LTR style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span
+dir=LTR></span>:</span><span dir=RTL></span><span style='font-size:9.0pt;
+font-family:"Gisha",sans-serif;mso-ascii-font-family:Aptos;mso-ascii-theme-font:
+minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:minor-latin'><span
+dir=RTL></span> <span lang=HE>מערכת סולארית מייצרת כמות גדולה של אנרגיה שמאוחסנת
+במערכת הצבירה, כך ניתן להקטין משמעותית את גודל מערכת הצבירה הנדרשת לשבת.</span></span><span
+dir=LTR style='font-size:9.0pt;mso-bidi-font-family:Gisha'><o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:34.85pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-17.85pt;
+line-height:normal;mso-pagination:none;mso-list:l1 level2 lfo15;mso-hyphenate:
+none'><![if !supportLists]><span style='font-size:9.0pt;mso-bidi-font-family:
+Aptos;mso-bidi-theme-font:minor-latin'><span style='mso-list:Ignore'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+dir=RTL></span><b><span lang=HE style='font-size:9.0pt;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>פתרון לשימוש רציף</span></b><span
+lang=HE style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>: מערכת סולארית מתאימה מאפשרת להשתמש במערכת הצבירה גם במקרה של שבת
+ויו&quot;ט סמוכים יומיים ושלושה, וכן מהווה פתרון מושלם למקרים בהם אין חיבור
+סדיר לחברת החשמל או שישנו צורך לחשמל עצמאי כל ימות השבוע.</span><span dir=LTR
+style='font-size:9.0pt;mso-bidi-font-family:Gisha'><o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:34.85pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-17.85pt;
+line-height:normal;mso-pagination:none;mso-list:l1 level2 lfo15;mso-hyphenate:
+none'><![if !supportLists]><span style='font-size:9.0pt;mso-bidi-font-family:
+Aptos;mso-bidi-theme-font:minor-latin'><span style='mso-list:Ignore'>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+dir=RTL></span><b><span lang=HE style='font-size:9.0pt;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>רווחים מתעו&quot;ז </span></b><span
+lang=HE style='font-size:6.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'>(<b>ת</b>עריף <b>ע</b>ומס <b>וז</b>מן)</span><b><span lang=HE
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'> למוסדות</span></b><span dir=LTR></span><span dir=LTR
+style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span dir=LTR></span>:</span><span
+dir=RTL></span><span style='font-size:9.0pt;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'><span dir=RTL></span> <span lang=HE>שילוב
+מערכת סולארית עם מערכת צבירה מאפשר למוסדות לנצל את היתרון של תעריפי החשמל
+המשתנים במהלך היום. בשעות שיא הייצור הסולארי, ניתן לצבור אנרגיה ולאחר מכן
+להשתמש בה בשעות השיא של הצריכה, כשהתעריף גבוה יותר, ובכך לחסוך עלויות בצורה
+משמעותית ביותר</span></span><span dir=LTR></span><span dir=LTR
+style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span dir=LTR></span>.</span><span
+dir=RTL></span><span lang=HE style='font-size:9.0pt;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'><span dir=RTL></span> בנוסף מוסדות
+יכולים למכור את האנרגיה העודפת לרשת החשמל בשעות שבהן התעריף גבוה, ולהרוויח
+תשלומים משמעותיים מתעו&quot;ז. השימוש במערכת צבירה מאפשר גמישות בניהול האנרגיה
+ומקסום הרווחים</span><span dir=LTR></span><span dir=LTR style='font-size:9.0pt;
+mso-bidi-font-family:Gisha'><span dir=LTR></span>.</span><span dir=RTL></span><span
+style='font-size:9.0pt;font-family:"Gisha",sans-serif;mso-ascii-font-family:
+Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:
+minor-latin'><span dir=RTL></span> <span lang=HE>המערכת המשולבת מאפשרת ניהול
+חכם של האנרגיה, כך שניתן להתאים את השימוש והאגירה לצרכים המשתנים של המוסד,
+ולהבטיח אספקת חשמל יציבה וזולה בכל שעות היממה</span></span><span dir=LTR></span><span
+dir=LTR style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span dir=LTR></span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-top:0cm;margin-right:34.85pt;
+margin-bottom:6.0pt;margin-left:0cm;text-align:justify;text-indent:-17.85pt;
+line-height:normal;mso-pagination:none;mso-list:l1 level2 lfo15;mso-hyphenate:
+none'><![if !supportLists]><span style='font-size:9.0pt;mso-bidi-font-family:
+Aptos;mso-bidi-theme-font:minor-latin'><span style='mso-list:Ignore'>4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+dir=RTL></span><b><span lang=HE style='font-size:9.0pt;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>אספקת חשמל רציפה</span></b><span
+dir=LTR></span><span dir=LTR style='font-size:9.0pt;mso-bidi-font-family:Gisha'><span
+dir=LTR></span>: </span><span lang=HE style='font-size:9.0pt;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>במקרים של הפסקות חשמל או תקלות ברשת
+הארצית, השילוב בין מערכת סולארית למערכת צבירה מאפשר אספקת חשמל רציפה ואמינה, באופן
+שהבית או המוסד ימשיכו לתפקד בצורה תקינה גם במצבי חירום כולל אספקת חשמל למערכות
+קריטיות כמו תאורה, תקשורת, ומכשירים רפואיים וכד'.</span><span dir=LTR
+style='font-size:9.0pt;mso-bidi-font-family:Gisha'><o:p></o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-bottom:6.0pt;text-align:justify'><span
+lang=HE style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal dir=RTL style='margin-bottom:6.0pt;text-align:justify'><span
+lang=HE style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>צוות המומחים של <b>צור מערכות חשמל</b>
+מחויב לספק בסעייתא דשמיא שירות מקצועי, אדיב ונגיש, עם מענה אישי לצרכים שלכם בכל
+שלב – מהייעוץ הראשוני ועד לתחזוקה שוטפת, עם פתרונות מותאמים אישית שמבוססים על
+הבנת הצרכים הספציפיים שלכם, כדי להבטיח שאתם מקבלים את הפתרון האופטימלי עבורכם, בצור
+מערכות חשמל מתקדמות, אנו שואפים להציע לכם לא רק את הטכנולוגיה המתקדמת ביותר,
+אלא גם שירות ששם אתכם בראש סדר העדיפויות. הצטרפו אלינו ותיהנו מהשירות הטוב
+ביותר ומפתרונות שמתאימים בדיוק לצרכים שלכם</span><span dir=LTR></span><span
+dir=LTR style='font-size:9.0pt;line-height:115%;mso-bidi-font-family:Gisha'><span
+dir=LTR></span>.</span><span lang=HE style='font-size:9.0pt;line-height:115%;
+font-family:"Gisha",sans-serif;mso-ascii-font-family:Aptos;mso-ascii-theme-font:
+minor-latin;mso-hansi-font-family:Aptos;mso-hansi-theme-font:minor-latin'><o:p></o:p></span></p>
+
+<p class=MsoNormal align=right dir=RTL style='text-align:left'><span lang=HE
+style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal align=right dir=RTL style='margin-bottom:0cm;text-align:
+left'><span lang=HE style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>בברכה<o:p></o:p></span></p>
+
+<p class=MsoNormal align=right dir=RTL style='text-align:left'><span lang=HE
+style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>צוות צור מערכות חשמל מתקדמות<o:p></o:p></span></p>
+
+<p class=MsoNormal align=right dir=RTL style='text-align:left'><span lang=HE
+style='font-size:9.0pt;line-height:115%;font-family:"Gisha",sans-serif;
+mso-ascii-font-family:Aptos;mso-ascii-theme-font:minor-latin;mso-hansi-font-family:
+Aptos;mso-hansi-theme-font:minor-latin'>02.644.71.81</span><span dir=LTR
+style='font-size:9.0pt;line-height:115%;mso-bidi-font-family:Gisha'><o:p></o:p></span></p>
+</td>
+</tr></table>
+<br/>
+כל הזכויות שמורות עפ"י תורתינו הקדושה ולהבדיל עפ"י החוק לחברת צור מערכות חשמל מתקדמות, אין להעתיק או לשנות ללא רשות בכתב.<br/><br/>
+
+
+
+
+    <script>
+        const productDefaults = {
+             'מזגן 1 כח סוס': { defaultPower: 745, defaultUtilization: 75, defaultHours: 10 },
+            'מזגן 1.25 כח סוס': { defaultPower: 930, defaultUtilization: 75, defaultHours: 10 },
+            'מזגן 1.5 כח סוס': { defaultPower: 1200, defaultUtilization: 75, defaultHours: 10 },
+            'מזגן 2 כח סוס': { defaultPower: 1500, defaultUtilization: 75, defaultHours: 10 },
+            'מזגן 2.5 כח סוס': { defaultPower: 1900, defaultUtilization: 75, defaultHours: 10 },
+            'מזגן 3 כח סוס': { defaultPower: 2300, defaultUtilization: 75, defaultHours: 10 },
+            'מזגן 3.5 כח סוס': { defaultPower: 2600, defaultUtilization: 75, defaultHours: 10 },
+            'מזגן 4 כח סוס': { defaultPower: 3000, defaultUtilization: 75, defaultHours: 10 },
+            'מזגן 4.5 כח סוס': { defaultPower: 3400, defaultUtilization: 75, defaultHours: 10 },
+            'מזגן מיני מרכזי': { defaultPower: 4500, defaultUtilization: 75, defaultHours: 10 },
+            'מקרר ממוצע': { defaultPower: 180, defaultUtilization: 55, defaultHours: 26 },
+            'מקפיא גדול': { defaultPower: 200, defaultUtilization: 55, defaultHours: 26 },
+            'תאורה פלורוסנט לד': { defaultPower: 18, defaultUtilization: 100, defaultHours: 26 },
+            'תאורה נורת לד': { defaultPower: 15, defaultUtilization: 100, defaultHours: 26 },
+            'תאורת לד דקורטיבי גדול': { defaultPower: 100, defaultUtilization: 100, defaultHours: 26 },
+            'פלטה ארבע סירים': { defaultPower: 400, defaultUtilization: 80, defaultHours: 20 },
+            'פלטה שש סירים': { defaultPower: 600, defaultUtilization: 80, defaultHours: 20 },
+            'מאוורר': { defaultPower: 130, defaultUtilization: 100, defaultHours: 26 },
+            'מיחם': { defaultPower: 140, defaultUtilization: 35, defaultHours: 26 },
+        };
+
+
+        function formatNumber(num) {
+            return num.toLocaleString('he-IL', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function saveData(programName) {
+            const rows = document.querySelectorAll('#productTable tbody tr');
+            const data = Array.from(rows).map(row => {
+                return {
+                    name: row.querySelector('select[name="name"]').value,
+                    power: row.querySelector('input[name="power"]').value,
+                    hours: row.querySelector('input[name="hours"]').value,
+                    utilization: row.querySelector('input[name="utilization"]').value,
+                    status: row.querySelector('.status-btn').dataset.status
+                };
+            });
+            const programs = JSON.parse(localStorage.getItem('programs')) || {};
+            programs[programName] = data;
+            localStorage.setItem('programs', JSON.stringify(programs));
+            loadProgramNames();
+            document.getElementById('programSelect').value = programName;
+            document.getElementById('updateProgramBtn').style.display = 'inline'; // הצגת כפתור עדכון
+        }
+
+        function updateData(programName) {
+            saveData(programName); // שמירה של התוכנית
+        }
+
+        function loadData(programName) {
+            const programs = JSON.parse(localStorage.getItem('programs')) || {};
+            const data = programs[programName];
+
+            if (data) {
+                document.querySelector('#productTable tbody').innerHTML = '';
+                data.forEach(item => {
+                    addRow(item.name, item.power, item.hours, item.utilization, item.status);
+                });
+            }
+        }
+
+        function resetForm() {
+            if (confirm('האם אתה בטוח שברצונך לאפס את הטופס? כל הנתונים יימחקו אם לא שומרם.')) {
+                document.querySelector('#productTable tbody').innerHTML = '';
+                updateInfoBox();
+            }
+        }
+
+        function addRow(name = '', power = '', hours = '', utilization = '', status = 'default') {
+            const tableBody = document.querySelector('#productTable tbody');
+            const row = document.createElement('tr');
+
+            row.innerHTML = `
+                <td>
+                    <select name="name">
+                        <option value="בחר מוצר" ${name === 'בחר מוצר' ? 'selected' : ''}>בחר מוצר</option>
+                        ${Object.keys(productDefaults).map(product => `<option value="${product}" ${name === product ? 'selected' : ''}>${product}</option>`).join('')}
+                    </select>
+                </td>
+                <td><input type="number" name="power" value="${power}"></td>
+                <td><input type="number" name="hours" value="${hours}"></td>
+                <td><input type="number" name="utilization" value="${utilization}"></td>
+                <td>
+                    <button class="status-btn ${status}" data-status="${status}">${status === 'default' ? 'כללי' : status === 'a' ? 'מצב א\'' : 'מצב ב\''}</button>
+                </td>
+                <td><button class="deleteBtn">מחק</button></td>
+            `;
+
+            const statusBtn = row.querySelector('.status-btn');
+
+            statusBtn.addEventListener('click', () => {
+                const currentStatus = statusBtn.dataset.status;
+                const nextStatus = currentStatus === 'default' ? 'a' : currentStatus === 'a' ? 'b' : 'default';
+                statusBtn.dataset.status = nextStatus;
+                statusBtn.textContent = nextStatus === 'default' ? 'כללי' : nextStatus === 'a' ? 'מצב א\'' : 'מצב ב\'';
+                statusBtn.className = `status-btn ${nextStatus}`; // עדכון סגנון כפתור
+                updateInfoBox();
+            });
+
+            row.querySelector('.deleteBtn').addEventListener('click', () => {
+                row.remove();
+                updateInfoBox();
+            });
+
+            row.querySelector('select[name="name"]').addEventListener('change', (e) => {
+                const selectedProduct = e.target.value;
+                if (productDefaults[selectedProduct]) {
+                    row.querySelector('input[name="power"]').value = productDefaults[selectedProduct].defaultPower;
+                    row.querySelector('input[name="hours"]').value = productDefaults[selectedProduct].defaultHours;
+                    row.querySelector('input[name="utilization"]').value = productDefaults[selectedProduct].defaultUtilization;
+                }
+                updateInfoBox();
+            });
+
+            row.querySelectorAll('input[name="power"], input[name="hours"], input[name="utilization"]').forEach(input => {
+                input.addEventListener('input', updateInfoBox);
+            });
+
+            tableBody.appendChild(row);
+            updateInfoBox();
+        }
+
+        function updateInfoBox() {
+            const rows = document.querySelectorAll('#productTable tbody tr');
+            let totalPower = 0;
+            let totalConsumption = 0;
+            const powerByStatus = { default: 0, a: 0, b: 0 };
+            let hasAllStatuses = { default: false, a: false, b: false };
+
+            rows.forEach(row => {
+                const power = parseFloat(row.querySelector('input[name="power"]').value) || 0;
+                const hours = parseFloat(row.querySelector('input[name="hours"]').value) || 0;
+                const utilization = parseFloat(row.querySelector('input[name="utilization"]').value) || 0;
+                const status = row.querySelector('.status-btn').dataset.status;
+
+                const consumption = (power * hours * utilization) / 100;
+                totalConsumption += consumption;
+
+                powerByStatus[status] += power;
+                hasAllStatuses[status] = true;
+                totalPower += power;
+            });
+
+            let maxSimultaneousPower = totalPower;
+            if (hasAllStatuses.default && hasAllStatuses.a && hasAllStatuses.b) {
+                const X = powerByStatus.default;
+                const Y = powerByStatus.a;
+                const Z = powerByStatus.b;
+                maxSimultaneousPower = Math.max(X + Y, X + Z);
+            }
+
+	let Inverter = maxSimultaneousPower*1.3;
+	let Batteries = totalConsumption*1.2;
+	
+	if (Inverter < 1000) {
+	    Inverter = 1000;
+	} else {
+	    Inverter = Math.ceil(Inverter / 500) * 500;
+	}
+
+	if (Batteries < 3000) {
+	    Batteries = 3000;
+	} else {
+	    Batteries = Math.ceil(Batteries / 1000) * 1000;
+	}
+
+	
+
+            document.getElementById('totalPower').textContent = formatNumber(maxSimultaneousPower);
+            document.getElementById('Inverter').textContent = formatNumber(Inverter);
+
+            document.getElementById('totalConsumption').textContent = formatNumber(totalConsumption);
+            document.getElementById('Batteries').textContent = formatNumber(Batteries);
+
+            // חישוב עלויות
+            const leadBatteryCost = Batteries * 0.52;
+            const lithiumBatteryCostMin = Batteries * 1.2;
+            const lithiumBatteryCostMax = Batteries * 1.8;
+            let inverterCost = Inverter * 1.85;
+            if (Inverter > 3500) {
+                inverterCost = Inverter * 1.5;
+            }
+
+            document.getElementById('totalLeadSystemCost').textContent = formatNumber(leadBatteryCost + inverterCost);
+            document.getElementById('totalLithiumSystemCostRange').textContent = `${formatNumber(lithiumBatteryCostMax + inverterCost)} - ${formatNumber(lithiumBatteryCostMin + inverterCost)}`;
+
+        }
+
+        function loadProgramNames() {
+            const programs = JSON.parse(localStorage.getItem('programs')) || {};
+            const programSelect = document.getElementById('programSelect');
+            programSelect.innerHTML = '<option value="">בחר תוכנית</option>';
+
+            Object.keys(programs).forEach(programName => {
+                const option = document.createElement('option');
+                option.value = programName;
+                option.textContent = programName;
+                programSelect.appendChild(option);
+            });
+        }
+
+        document.getElementById('addRowBtn').addEventListener('click', () => addRow());
+        document.getElementById('resetBtn').addEventListener('click', resetForm);
+        document.getElementById('saveProgramBtn').addEventListener('click', () => {
+            const programName = document.getElementById('programName').value;
+            if (programName) {
+                saveData(programName);
+                document.getElementById('programName').value = ''; // ניקוי שדה שם התוכנית לאחר שמירה
+            } else {
+                alert('אנא הזן שם לתוכנית.');
+            }
+        });
+
+        document.getElementById('updateProgramBtn').addEventListener('click', () => {
+            const programName = document.getElementById('programSelect').value;
+            if (programName) {
+                updateData(programName);
+            } else {
+                alert('אנא בחר תוכנית לעדכון.');
+            }
+        });
+
+        document.getElementById('programSelect').addEventListener('change', (e) => {
+            const programName = e.target.value;
+            if (programName) {
+                loadData(programName);
+                document.getElementById('updateProgramBtn').style.display = 'inline'; // הצגת כפתור עדכון
+            } else {
+                resetForm();
+                document.getElementById('updateProgramBtn').style.display = 'none'; // הסתרת כפתור עדכון
+            }
+        });
+
+        document.getElementById('deleteProgramBtn').addEventListener('click', () => {
+            const programName = document.getElementById('programSelect').value;
+            if (programName) {
+                const programs = JSON.parse(localStorage.getItem('programs')) || {};
+                delete programs[programName];
+                localStorage.setItem('programs', JSON.stringify(programs));
+                loadProgramNames();
+                resetForm();
+                document.getElementById('updateProgramBtn').style.display = 'none'; // הסתרת כפתור עדכון
+            } else {
+                alert('אנא בחר תוכנית למחיקה.');
+            }
+        });
+
+        document.getElementById('addNewProductBtn').addEventListener('click', () => {
+            const newProductName = document.getElementById('newProductName').value;
+            if (newProductName) {
+                productDefaults[newProductName] = { defaultHours: 0, defaultUtilization: 0, defaultPower: 0 };
+                loadProgramNames(); // עדכון הרשימה לאחר הוספת מוצר חדש
+            } else {
+                alert('אנא הזן שם למוצר החדש.');
+            }
+        });
+
+        loadProgramNames();
+        document.addEventListener('DOMContentLoaded', function() {
+            addRow(); // הוספת שורה אוטומטית בעת טעינת הדף
+        });
+    </script>
+</body>
+</html>
